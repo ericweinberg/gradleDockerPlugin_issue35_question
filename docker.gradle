@@ -13,7 +13,7 @@ repositories {
   mavenCentral()
 }
 
-apply plugin: 'com.bmuschko.docker-remote-api'
+apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
 
 docker {
   if(System.env.DOCKER_HOST) {
