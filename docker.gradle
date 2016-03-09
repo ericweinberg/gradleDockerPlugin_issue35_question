@@ -1,0 +1,62 @@
+buildscript {
+  dependencies {
+    classpath "com.bmuschko:gradle-docker-plugin:2.6.5"
+  }
+
+  repositories {
+    mavenCentral()
+    jcenter()
+  }
+}
+
+repositories {
+  mavenCentral()
+}
+
+apply plugin: 'com.bmuschko.docker-remote-api'
+
+docker {
+  if(System.env.DOCKER_HOST) {
+    url = "$System.env.DOCKER_HOST".replace('tcp', 'https')
+    certPath = new File("$System.env.DOCKER_CERT_PATH")
+  }
+  else {
+    //if no docker host is set, then we're going to assume we're on a big boy linux environment with docker running natively
+    url = 'unix:///var/run/docker.sock'
+  }
+}
+
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerStopContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer
+
+def CONTAINER_NAME = 'foobar'
+
+task buildImage(type: DockerBuildImage) {
+  inputDir = project.file('.')
+  tag = 'foobar'
+}
+
+task buildContainer(type: DockerCreateContainer) {
+  dependsOn buildImage
+  targetImageId { buildImage.getImageId() }
+  hostName = CONTAINER_NAME
+  containerName = CONTAINER_NAME
+  portBindings = ['8081::8081']
+}
+
+task startContainer(type: DockerStartContainer) {
+  dependsOn buildContainer
+  targetContainerId { CONTAINER_NAME }
+}
+
+task removeContainer(type: DockerRemoveContainer) {
+  removeVolumes = true
+  targetContainerId { CONTAINER_NAME }
+}
+
+task stopContainer(type: DockerStopContainer) {
+  targetContainerId { CONTAINER_NAME}
+}

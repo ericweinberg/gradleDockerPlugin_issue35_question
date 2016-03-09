@@ -1,0 +1,24 @@
+buildscript {
+  dependencies {
+    classpath "com.bmuschko:gradle-docker-plugin:2.6.5"
+  }
+
+  repositories {
+    mavenCentral()
+    jcenter()
+  }
+}
+
+plugins {
+  id "com.jfrog.artifactory" version "4.0.0"
+}
+
+repositories {
+   mavenCentral()
+}
+
+apply from: 'docker.gradle'
+
+task helloWorld {
+  println 'hello world'
+}
